@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
 
@@ -29,12 +29,49 @@ async function run() {
         await client.connect();
 
         const serviceCollection = client.db('carDoctorDB').collection('services');
+        const bookingCollection = client.db('carDoctorDB').collection('booking');
 
-        app.get('/services', async (req, res)=> {
+        app.get('/services', async (req, res) => {
             const cursor = serviceCollection.find();
-            const result=await cursor.toArray();
+            const result = await cursor.toArray();
             res.send(result);
         })
+
+        app.get('/services/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const options = {
+
+                // Include only the `title` and `imdb` fields in each returned document
+                projection: { service_id: 1, title: 1, price: 1, img: 1 },
+            };
+
+            const result = await serviceCollection.findOne(query, options);
+            res.send(result);
+
+        })
+
+        // Booking
+        app.get('/bookings', async (req, res) => {
+            console.log(req.query);
+            let query = {};
+            if (req.query?.email) {
+                query = { email: req.query.email }
+            }
+            const result = await bookingCollection.find(query).toArray();
+            res.send(result);
+
+
+        })
+
+
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body;
+            const result = await bookingCollection.insertOne(booking);
+            res.send(result);
+        })
+
+
 
 
 
