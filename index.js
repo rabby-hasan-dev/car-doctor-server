@@ -54,7 +54,7 @@ async function run() {
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            console.log(user);
+            
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRATE, {
                 expiresIn: '1h'
             });
@@ -85,7 +85,7 @@ async function run() {
         // Booking
         app.get('/bookings', verifyJWT, async (req, res) => {
             const decoded = req.decoded;
-            console.log('came back after verify ', decoded)
+            // console.log('came back after verify ', decoded)
             if (decoded.email !== req.query.email) {
                 return res.status(403).send({ error: true, message: 'unauthorized access' })
             }
